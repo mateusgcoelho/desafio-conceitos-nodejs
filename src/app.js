@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 
-const { uuid } = require("uuidv4");
+const { uuid, isUuid } = require("uuidv4");
 
 const app = express();
 
@@ -9,6 +9,16 @@ app.use(express.json());
 app.use(cors());
 
 const repositories = [];
+
+function validateId(request, response, next) {
+  const { id } = request.params;
+
+  if (!isUuid(id)) return response.status(400).json({ error: 'Invalid repository ID!' });
+
+  next();
+}
+
+app.use(validateId);
 
 app.get("/repositories", (request, response) => {
   return response.json(repositories);
@@ -31,7 +41,7 @@ app.put("/repositories/:id", (request, response) => {
   const repositorieIndex = repositories.findIndex(repositorie => repositorie.id === id);
 
   if (repositorieIndex < 0) {
-      return res.status(404).json({ error: 'Repositorie not found.' });
+      return response.status(404).json({ error: 'Repositorie not found.' });
   }
 
   const repositorie = {
@@ -49,10 +59,10 @@ app.put("/repositories/:id", (request, response) => {
 app.delete("/repositories/:id", (request, response) => {
   const { id } = request.params;
 
-  const repositorieIndex = repositories.filterIndex(repositorie => repositorie.id === id);
+  const repositorieIndex = repositories.findIndex(repositorie => repositorie.id === id);
 
   if (repositorieIndex < 0) {
-    return res.status(404).json({ error: 'Repositorie not found.' });
+    return response.status(404).json({ error: 'Repositorie not found.' });
   }
 
   repositories.splice(repositorieIndex, 1);
@@ -63,10 +73,10 @@ app.delete("/repositories/:id", (request, response) => {
 app.post("/repositories/:id/like", (request, response) => {
   const { id } = request.params;
 
-  const repositorieIndex = repositories.filterIndex(repositorie => repositorie.id === id);
+  const repositorieIndex = repositories.findIndex(repositorie => repositorie.id === id);
 
   if (repositorieIndex < 0) {
-    return res.status(404).json({ error: 'Repositorie not found.' });
+    return response.status(404).json({ error: 'Repositorie not found.' });
   }
 
   repositories[repositorieIndex].likes += 1;
