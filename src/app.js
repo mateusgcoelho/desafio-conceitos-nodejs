@@ -18,7 +18,7 @@ function validateId(request, response, next) {
   next();
 }
 
-app.use(validateId);
+app.use('/repositories/:id', validateId);
 
 app.get("/repositories", (request, response) => {
   return response.json(repositories);
